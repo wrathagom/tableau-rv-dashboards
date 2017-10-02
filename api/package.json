@@ -1,0 +1,17 @@
+{
+  "name": "tableau-tv-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "hapi": "^16.6.2",
+    "lowdb": "^1.0.0",
+    "shortid": "^2.2.8"
+  }
+}

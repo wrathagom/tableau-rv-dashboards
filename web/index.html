@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <style type="text/css">
+            html, body {
+                height: 100%;
+                margin: 0;
+            }
+    
+            .wrapper {
+                min-height: 100%; 
+            }
+
+            #div1 {
+                background-color: white;
+            }
+
+            #div2 {
+                background-color: white;
+                display: none;
+            }
+
+        </style>
+        <!--[if lte IE 6]>
+        <style type="text/css">
+            #container {
+                height: 100%;
+            }
+        </style>
+        <![endif]-->
+    </head>
+    
+    <body>
+        <div class="wrapper" id="div1"></div>
+        <div class="wrapper" id="div2"></div>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="   crossorigin="anonymous"></script>
+    <script src="http://tableau.samtec.com/javascripts/api/tableau-2.min.js"></script>
+    <script>
+        var vizzes = []
+
+        $(document).ready(function() {
+            var w = window.innerWidth;
+            var h = window.innerHeight;
+            var vizList = {}
+            var iteration = 0
+
+            if (getParameterByName('dashboard')) {
+                var dashboardName = getParameterByName('dashboard')
+                $.ajax({
+                    url: "api/sets/" + dashboardName
+                }).done( function(data) {
+                    vizList = data
+                    initViz(w,h,iteration, vizList)
+                })
+            } else {
+                alert('no dashboard')
+            }
+        })
+
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+        
+        function initViz(w, h, iteration, vizList) {
+            var vizNumber = iteration % 2
+            var targetDiv = "div" + (vizNumber + 1)
+            var vizUrl = vizList.dashboards[iteration % vizList.dashboards.length].url
+            var vizTiming = vizList.dashboards[iteration % vizList.dashboards.length].delay
+
+            console.log('Trying to load viz' + vizNumber + ' into ' + targetDiv + ' on iteration ' + iteration)
+
+            if (iteration > vizNumber) {
+                vizzes[vizNumber].dispose()
+            }
+
+            var containerDiv = document.getElementById(targetDiv)
+            var options = {
+                hideTabs: true,
+                width: w + "px",
+                height: h + "px",
+                onFirstInteractive: function() {
+                    if (iteration > 0) {
+                        $('.wrapper').slideToggle()
+                    }
+                    iteration = iteration + 1
+                    setTimeout(function() {
+                        initViz(w, h, iteration, vizList)
+                    }, vizTiming * 1000);
+                }
+            };
+                
+            vizzes[vizNumber] = new tableau.Viz(containerDiv, vizUrl, options); 
+        }
+    </script>
+</html>
